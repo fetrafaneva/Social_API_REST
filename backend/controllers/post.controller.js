@@ -1,4 +1,5 @@
 import { Post } from "../models/user.model.js"; // on prend le Post de ton fichier unique
+import mongoose from "mongoose";
 
 // ------------------ CREATE POST ------------------
 export const createPost = async (req, res) => {
@@ -36,17 +37,24 @@ export const getPosts = async (req, res) => {
 // ------------------ DELETE POST ------------------
 export const deletePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    const { id } = req.params;
 
-    // vérifier si l'utilisateur est l'auteur
-    if (post.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not allowed" });
+    // vérifier l'ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID invalide" });
     }
 
-    await post.remove();
-    res.status(200).json({ message: "Post deleted" });
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post non trouvé" });
+    }
+
+    await post.deleteOne();
+
+    res.status(200).json({ message: "Post supprimé avec succès" });
   } catch (error) {
+    console.error("DELETE POST ERROR:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
