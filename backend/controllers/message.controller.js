@@ -55,3 +55,19 @@ export const getConversation = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// ------------------ GET INBOX ------------------
+export const getInbox = async (req, res) => {
+  try {
+    const messages = await Message.find({
+      receiver: req.user._id,
+    })
+      .populate("sender", "username email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error("GET INBOX ERROR:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
