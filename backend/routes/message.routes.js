@@ -6,6 +6,7 @@ import {
   getInbox,
   markMessageAsRead,
   countUnreadMessages,
+  deleteMessage,
 } from "../controllers/message.controller.js";
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.get("/conversation/:userId", authMiddleware, getConversation);
 
 router.get("/unread/count", authMiddleware, countUnreadMessages); // comptage des messages non lus
 router.patch("/:id/read", authMiddleware, markMessageAsRead); // marquer comme lu
+router.delete("/:id", authMiddleware, deleteMessage);
 
 export default router;
