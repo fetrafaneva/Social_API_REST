@@ -160,3 +160,51 @@ export const deleteMessage = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// ------------------ UPDATE MESSAGE ------------------
+export const updateMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    if (!content?.trim()) {
+      return res.status(400).json({ message: "Le message est requis" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Message ID invalide" });
+    }
+
+    const message = await Message.findById(id);
+
+    if (!message) {
+      return res.status(404).json({ message: "Message non trouvé" });
+    }
+
+    // seul l'expéditeur peut modifier
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Accès refusé" });
+    }
+
+    // message déjà lu → interdit
+    if (message.isRead) {
+      return res
+        .status(400)
+        .json({ message: "Impossible de modifier un message lu" });
+    }
+
+    message.content = content.trim();
+    message.edited = true;
+    message.editedAt = new Date();
+
+    await message.save();
+
+    res.status(200).json({
+      message: "Message modifié avec succès",
+      data: message,
+    });
+  } catch (error) {
+    console.error("UPDATE MESSAGE ERROR:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

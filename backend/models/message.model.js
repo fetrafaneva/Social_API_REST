@@ -22,6 +22,15 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    edited: {
+      type: Boolean,
+      default: false,
+    },
+
+    // date de modification
+    editedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true, // createdAt = date d’envoi
