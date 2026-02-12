@@ -214,7 +214,7 @@ export const getConversations = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // récupérer tous les messages de l'utilisateur
+    // recuperer tous les messages de l'utilisateur
     const messages = await Message.find({
       $or: [{ sender: userId }, { receiver: userId }],
     })
@@ -225,13 +225,31 @@ export const getConversations = async (req, res) => {
     const conversationsMap = new Map();
 
     for (const msg of messages) {
-      // déterminer l'autre utilisateur
+      // determiner l'autre utilisateur
       const otherUser =
         msg.sender._id.toString() === userId.toString()
           ? msg.receiver
           : msg.sender;
 
       const otherUserId = otherUser._id.toString();
+
+      // si la conversation existe deja on va ignorer (on garde le dernier message pour l'afficher en haut(pour le frontend))
+      if (!conversationsMap.has(otherUserId)) {
+        conversationsMap.set(otherUserId, {
+          user: {
+            id: otherUser._id,
+            username: otherUser.username,
+          },
+          lastMessage: msg.content,
+          lastMessageAt: msg.createdAt,
+          unreadCount: 0,
+        });
+      }
+
+      // compter les messages non lus recus
+      if (msg.receiver._id.toString() === userId.toString() && !msg.isRead) {
+        conversationsMap.get(otherUserId).unreadCount += 1;
+      }
     }
 
     res.status(200).json(Array.from(conversationsMap.values()));
