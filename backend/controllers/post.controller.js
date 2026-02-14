@@ -179,3 +179,40 @@ export const addComment = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// ------------------ REPLY TO COMMENT ------------------
+export const replyToComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+    const { content } = req.body;
+
+    if (!content?.trim()) {
+      return res.status(400).json({ message: "Reply content required" });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    comment.replies.push({
+      user: req.user._id,
+      content,
+    });
+
+    await post.save();
+
+    res.status(201).json({
+      message: "Reply added",
+      replies: comment.replies,
+    });
+  } catch (error) {
+    console.error("REPLY ERROR:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
