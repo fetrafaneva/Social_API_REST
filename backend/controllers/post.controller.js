@@ -119,3 +119,100 @@ export const getPostById = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// ------------------ LIKE / UNLIKE POST ------------------
+export const toggleLikePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const alreadyLiked = post.likes.includes(userId);
+
+    if (alreadyLiked) {
+      // unlike
+      post.likes.pull(userId);
+    } else {
+      // like
+      post.likes.push(userId);
+    }
+
+    await post.save();
+
+    res.status(200).json({
+      message: alreadyLiked ? "Post unliked" : "Post liked",
+      likesCount: post.likes.length,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ------------------ ADD COMMENT ------------------
+export const addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    if (!content?.trim()) {
+      return res.status(400).json({ message: "Comment required" });
+    }
+
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    post.comments.push({
+      user: req.user._id,
+      content,
+    });
+
+    await post.save();
+
+    res.status(201).json({ message: "Comment added", comments: post.comments });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ------------------ REPLY TO COMMENT ------------------
+export const replyToComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+    const { content } = req.body;
+
+    if (!content?.trim()) {
+      return res.status(400).json({ message: "Reply content required" });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    comment.replies.push({
+      user: req.user._id,
+      content,
+    });
+
+    await post.save();
+
+    res.status(201).json({
+      message: "Reply added",
+      replies: comment.replies,
+    });
+  } catch (error) {
+    console.error("REPLY ERROR:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

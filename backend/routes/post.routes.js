@@ -1,10 +1,13 @@
 import express from "express";
-import { authMiddleware } from "../middleware/auth.middleware.js"; // middleware à créer pour JWT
+import { authMiddleware } from "../middleware/auth.middleware.js"; // middleware a ajoute pour JWT
 import {
+  addComment,
   createPost,
   deletePost,
   getPostById,
   getPosts,
+  replyToComment,
+  toggleLikePost,
   updatePost,
 } from "../controllers/post.controller.js";
 
@@ -18,5 +21,12 @@ router.post("/", authMiddleware, createPost);
 router.delete("/:id", authMiddleware, deletePost);
 router.put("/:id", authMiddleware, updatePost);
 router.get("/:id", getPostById);
+router.patch("/:id/like", authMiddleware, toggleLikePost);
+router.post("/:id/comment", authMiddleware, addComment);
+router.post(
+  "/:postId/comment/:commentId/reply",
+  authMiddleware,
+  replyToComment
+);
 
 export default router;

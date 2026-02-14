@@ -54,15 +54,53 @@ const postSchema = new mongoose.Schema(
       ref: "User", // référence au modèle User
       required: true,
     },
-    likes: {
-      type: Number,
-      default: 0,
-    },
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     comments: [
       {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        comment: { type: String, required: true },
-        createdAt: { type: Date, default: Date.now },
+        _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+
+        content: {
+          type: String,
+          required: true,
+          trim: true,
+          maxlength: 500,
+        },
+
+        replies: [
+          {
+            user: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "User",
+              required: true,
+            },
+            content: {
+              type: String,
+              required: true,
+              trim: true,
+              maxlength: 500,
+            },
+            createdAt: {
+              type: Date,
+              default: Date.now,
+            },
+          },
+        ],
+
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },
