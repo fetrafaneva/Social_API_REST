@@ -182,6 +182,13 @@ export const addComment = async (req, res) => {
       content,
     });
 
+    await createNotification({
+      user: post.author,
+      fromUser: req.user._id,
+      type: "comment",
+      post: post._id,
+    });
+
     await post.save();
 
     res.status(201).json({ message: "Comment added", comments: post.comments });
@@ -216,6 +223,14 @@ export const replyToComment = async (req, res) => {
     });
 
     await post.save();
+
+    await createNotification({
+      user: comment.user,
+      fromUser: req.user._id,
+      type: "reply",
+      post: post._id,
+      commentId: comment._id,
+    });
 
     res.status(201).json({
       message: "Reply added",
