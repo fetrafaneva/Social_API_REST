@@ -1,5 +1,6 @@
 import { Post } from "../models/user.model.js"; // on prend le Post de ton fichier unique
 import mongoose from "mongoose";
+import { createNotification } from "../utils/createNotification.js";
 
 // ------------------ CREATE POST ------------------
 export const createPost = async (req, res) => {
@@ -141,6 +142,15 @@ export const toggleLikePost = async (req, res) => {
       post.likes.push(userId);
     }
 
+    if (!alreadyLiked) {
+      await createNotification({
+        user: post.author,
+        fromUser: req.user._id,
+        type: "like",
+        post: post._id,
+      });
+    }
+
     await post.save();
 
     res.status(200).json({
@@ -170,6 +180,13 @@ export const addComment = async (req, res) => {
     post.comments.push({
       user: req.user._id,
       content,
+    });
+
+    await createNotification({
+      user: post.author,
+      fromUser: req.user._id,
+      type: "comment",
+      post: post._id,
     });
 
     await post.save();
@@ -206,6 +223,14 @@ export const replyToComment = async (req, res) => {
     });
 
     await post.save();
+
+    await createNotification({
+      user: comment.user,
+      fromUser: req.user._id,
+      type: "reply",
+      post: post._id,
+      commentId: comment._id,
+    });
 
     res.status(201).json({
       message: "Reply added",
