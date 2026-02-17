@@ -93,9 +93,9 @@ backend/
 3. Configure environment variables:
 - Create `.env` in `/server`:
     ```text
-    PORT=5000
+    PORT=your_port
 
-    MONGO_URI=mongodb://localhost:27017/mern-auth
+    MONGO_URI=your_mongodb_URI
 
     JWT_SECRET=your_secure_jwt_secret
     ```
@@ -124,7 +124,23 @@ backend/
 ### Comments & Replies
 | Method | Endpoint                                                  | Description                                | Authentication Required |
 |--------|-----------------------------------------------------------|--------------------------------------------|-------------------------|
-| POST   | `/api/post/:id/comment`                                   | Comment a post                             | yes                     |
+| POST   | `/api/post/:id/comment`                                   | Get message                                | yes                     |
 | POST   | `/api/post/:postId/comment/:commentId/reply`              | Reply to comment                           | yes                     |
 | PATCH  | `/api/post/:postId/comment/:commentId/reply/:replyId`     | Uptdate reply                              | yes                     |
 | DELETE | `/api/post/:postId/comment/:commentId/reply/:replyId`     | Delete reply                               | yes                     |
+
+### Messages
+| Method | Endpoint                                                  | Description                                | Authentication Required |
+|--------|-----------------------------------------------------------|--------------------------------------------|-------------------------|
+| POST   | `/api/message/`                                           | Send message                               | yes                     |
+| GET    | `/api/message/inbox`                                      | Comment a post                             | yes                     |
+| GET    | `/api/message/unread/count`                               | Count unread message                       | yes                     |
+| GET    | `/api/message/conversations`                              | GET all conversations                      | yes                     |
+| GET    | `/api/message/conversation/:userId`                       | Get users conversation                     | yes                     |
+| PATCH  | `/api/message/conversations/:userId/read`                 | Mark conversation as read                  | yes                     |
+| PATCH  | `/api/message/:id/read`                                   | Mark message as read                       | yes                     |
+| PUT    | `/api/message/:id`                                        | Update message                             | yes                     |
+| DELETE | `/api/message/:id`                                        | Delete message                             | yes                     |
+
+
+
